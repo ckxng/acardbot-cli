@@ -1,0 +1,91 @@
+# When a push occurs to the master branch (such as a pull request to master,
+# or code directly pushed to master), analyze the gitlog according to
+# https://www.conventionalcommits.org/en/v1.0.0/ and bump the package.json
+# file accordingly.
+# 
+# This behavior can be prevented by including "[skip ci]"
+# in the commit log message of the merge.
+# 
+# The module will also be published to NPM and GPR under the new
+# version number unless "[skip ci]" is indicated.
+#
+name: Publish
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm ci
+    - run: npm run build --if-present
+    - run: npm test
+
+  version:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Perform a clean install of modules
+        run: npm ci
+      - name: Remove old documentation
+        run: rm -rf docs/
+      - name: Regenerate documentation with new version number
+        run: npm run doc
+      - name: Add changes and remove deletions
+        run: git add -A docs/
+      - name: Set git email
+        run: git config user.email "automated"
+      - name: Set git user
+        run: git config user.name "CI Workflow"
+      - name: Commit doc update
+        run: git commit -m "generate docs"
+      - name: Update version
+        run: docker run -v $(pwd):/repo ckxng/standardversion
+      - name: Push repo
+        run: git push --follow-tags origin master
+
+  publish-npm:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+  publish-gpr:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    needs: version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://npm.pkg.github.com/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
