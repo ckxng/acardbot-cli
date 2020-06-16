@@ -1,0 +1,38 @@
+{
+  "name": "@ckxng/acardbot-cli",
+  "version": "0.0.1",
+  "description": "A simple adaptive cards CLI for Teams incoming webhooks",
+  "main": "app.js",
+  "scripts": {
+    "doc": "jsdoc -p -R README.md -d ./docs/ ./lib/ ./app.js",
+    "test": "jshint . && npm audit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckxng/acardbot-cli.git"
+  },
+  "keywords": [
+    "adaptivecards",
+    "microsoft",
+    "teams",
+    "cli"
+  ],
+  "author": "Cameron King",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ckxng/acardbot-cli/issues"
+  },
+  "homepage": "https://github.com/ckxng/acardbot-cli#readme",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "@types/yargs": "^15.0.5",
+    "jsdoc": "^3.6.4",
+    "jshint": "^2.11.1"
+  },
+  "bin": {
+    "acardbot": "./app.js"
+  }
+}
