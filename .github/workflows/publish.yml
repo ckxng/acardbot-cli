@@ -41,6 +41,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Fetch tags
+        run: git fetch --tags
       - name: Perform a clean install of modules
         run: npm ci
       - name: Remove old documentation
