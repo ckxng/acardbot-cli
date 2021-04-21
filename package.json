@@ -1,6 +1,6 @@
 {
   "name": "@ckxng/acardbot-cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple adaptive cards CLI for Teams incoming webhooks",
   "main": "app.js",
   "scripts": {
